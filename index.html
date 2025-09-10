@@ -7,6 +7,51 @@
     <title>FilmLight</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+
+    <style>
+      /* ========== Ajustes CLAVE ========== */
+      :root {
+        /* Ajusta la posición de la barra DENTRO del logo (0% = borde sup., 100% = borde inf.) */
+        --progress-pos-x: 50%;
+        --progress-pos-y: 50%; /* 50% = justo al centro vertical del logo */
+        /* Ancho de la barra relativo al ancho del logo */
+        --progress-width: 90%;
+      }
+
+      /* Bloque (logo + barra sobrepuesta) y su posición general en la pantalla */
+      #unity-loading-bar {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 100px; /* Si quieres mover todo el bloque respecto al borde inferior, ajusta aquí */
+        text-align: center;
+      }
+
+      /* El logo actúa como contenedor de referencia para la barra */
+      #unity-logo {
+        position: relative;
+        display: inline-block;
+      }
+
+      #unity-logo img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* Barra SOBRE el logo, centrada (o donde digas con las variables) */
+      #unity-progress-bar-empty {
+        position: absolute;
+        left: var(--progress-pos-x);
+        top: var(--progress-pos-y);
+        transform: translate(-50%, -50%); /*  Centra exactamente en X/Y */
+        width: var(--progress-width);
+        z-index: 2; /* Asegura que quede encima de la imagen del logo */
+        /* Opcional: evita tapar clics si el logo llevara interacciones por debajo */
+        /* pointer-events: none; */
+      }
+      /* =================================== */
+    </style>
   </head>
   <body class="dark">
     <div id="unity-container" class="unity-desktop">
@@ -14,14 +59,17 @@
     </div>
     <div id="loading-cover" style="display:none;">
       <div id="unity-loading-bar">
-        <div id="unity-logo"><img src="logo.png"></div>
-        <div id="unity-progress-bar-empty" style="display: none;">
-          <div id="unity-progress-bar-full"></div>
+        <div id="unity-logo">
+          <img src="logo.png" alt="Logo">
+          <div id="unity-progress-bar-empty" style="display: none;">
+            <div id="unity-progress-bar-full"></div>
+          </div>
         </div>
         <div class="spinner"></div>
       </div>
     </div>
     <div id="unity-fullscreen-button" style="display: none;"></div>
+
     <script>
       let _HOST = window.origin;
       let unityInst = null;
@@ -49,8 +97,6 @@
       let canFullscreen = (function() {
         for (const key of [
             'exitFullscreen',
-            // 'webkitExitFullscreen',
-            // 'webkitCancelFullScreen',
             'mozCancelFullScreen',
             'msExitFullscreen',
           ]) {
@@ -64,8 +110,8 @@
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         container.className = "unity-mobile";
         config.devicePixelRatio = 1;
-        // canFullscreen = false;
       }
+
       loadingCover.style.display = "";
 
       const script = document.createElement("script");
@@ -89,7 +135,7 @@
         }).catch((message) => {
           alert(message);
         });
-      };    
+      };
       document.body.appendChild(script);
     </script>
   </body>
