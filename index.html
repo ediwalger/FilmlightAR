@@ -1,67 +1,110 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>FilmLight</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+    <!-- Puedes conservar tu CSS original; este archivo trae estilos de carga autosuficientes -->
+    <link rel="stylesheet" href="TemplateData/style.css" />
 
     <style>
-      /* =========================
-         LOGO Y BARRA
-         ========================= */
-
-      /* Contenedor del bloque (logo + barra) */
-      #unity-loading-bar {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 10vh; /* distancia desde abajo de la pantalla */
-        text-align: center;
-        z-index: 2;
+      /* ===== Layout base del canvas ===== */
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #000; /* fondo mientras carga */
+      }
+      #unity-container {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+      }
+      #unity-canvas {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+        background: #000;
       }
 
-      /* El logo sirve como referencia */
+      /* ===== Cover de carga visible por defecto ===== */
+      #loading-cover {
+        position: fixed !important;
+        inset: 0;
+        display: flex;                 /* visible desde el inicio */
+        align-items: flex-end;         /* colocamos el bloque cerca de la parte baja */
+        justify-content: center;
+        padding: env(safe-area-inset-top, 0px)
+                 env(safe-area-inset-right, 0px)
+                 env(safe-area-inset-bottom, 0px)
+                 env(safe-area-inset-left, 0px);
+        background: #000;              /* tapa lo que haya debajo mientras carga */
+        z-index: 9999;
+      }
+
+      /* ===== Bloque (logo + barra) ===== */
+      #unity-loading-bar {
+        position: relative;
+        text-align: center;
+        margin-bottom: 10vh; /* separa del borde inferior */
+      }
+
+      /* ===== Logo grande y centrado ===== */
       #unity-logo {
         position: relative;
         display: inline-block;
         line-height: 0;
       }
-
-      /* Logo grande y centrado */
       #unity-logo img {
         display: block;
-        object-fit: contain;
-        width: 90vw;        /* por defecto ocupa casi todo el ancho */
-        max-width: 1200px;  /* límite en desktop grandes */
-        max-height: 75vh;   /* no exceder altura de pantalla */
+        width: 90vw;               /* ancho dominante por defecto */
+        max-width: 1200px;         /* límite superior desktop */
+        max-height: 75vh;          /* no ocupar 100% de alto */
         height: auto;
+        object-fit: contain;
       }
 
-      /* Barra sobrepuesta dentro del logo */
+      /* ===== Barra sobrepuesta, centrada y alineada ===== */
       #unity-progress-bar-empty {
         position: absolute;
         left: 50%;
-        top: 60%; /* un poco más abajo del centro */
+        top: 60%;                               /* un poco más abajo del centro del logo */
         transform: translate(-50%, -50%);
-        width: 90%; /* ancha relativa al logo */
+        width: 90%;                             
+        height: 18px;                           
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.18);
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-radius: 12px;
+        overflow: hidden;                       /* recorta el llenado para alinear perfecto */
         z-index: 3;
       }
-
-      /* Hacer la barra más visible */
-      #unity-progress-bar-empty,
       #unity-progress-bar-full {
-        height: 18px;          /* grosor de la barra */
-        border-radius: 10px;
+        width: 0%;
+        height: 100%;
+        background: #15a8ff;
+        border-radius: inherit;
+        box-sizing: border-box;
+        transition: width 0.12s linear;         /* progresión suave */
       }
 
-      /* =========================
-         RESPONSIVE
-         ========================= */
+      /* Spinner opcional (solo visible sin progreso) */
+      .spinner {
+        margin-top: 16px;
+        width: 28px;
+        height: 28px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
 
-      /* Vertical (portrait): logo más ancho */
+      /* ===== Responsive ===== */
       @media (orientation: portrait) {
         #unity-logo img {
           width: 95vw;
@@ -72,15 +115,13 @@
           top: 62%;
         }
         #unity-loading-bar {
-          bottom: 8vh;
+          margin-bottom: 8vh;
         }
       }
-
-      /* Horizontal (landscape): logo manda por altura */
       @media (orientation: landscape) {
         #unity-logo img {
           width: auto;
-          height: 70vh;     /* grande por altura */
+          height: 70vh;      /* manda por altura en horizontal */
           max-width: 92vw;
         }
         #unity-progress-bar-empty {
@@ -88,11 +129,9 @@
           top: 58%;
         }
         #unity-loading-bar {
-          bottom: 10vh;
+          margin-bottom: 10vh;
         }
       }
-
-      /* Teléfonos muy pequeños */
       @media (max-width: 360px) {
         #unity-logo img {
           width: 96vw;
@@ -103,17 +142,14 @@
         }
       }
 
-      /* Cover ocupa toda la pantalla */
-      #loading-cover {
-        position: fixed !important;
-        inset: 0;
-        padding: env(safe-area-inset-top, 0px)
-                 env(safe-area-inset-right, 0px)
-                 env(safe-area-inset-bottom, 0px)
-                 env(safe-area-inset-left, 0px);
+      /* Asegura nitidez en móviles */
+      #unity-progress-bar-empty, #unity-progress-bar-full {
+        will-change: width, transform;
+        backface-visibility: hidden;
       }
 
-      .spinner { margin-top: 16px; }
+      /* Botón fullscreen (si decides mostrarlo) */
+      #unity-fullscreen-button { position: fixed; right: 16px; bottom: 16px; z-index: 10000; }
     </style>
   </head>
 
@@ -122,11 +158,12 @@
       <canvas id="unity-canvas"></canvas>
     </div>
 
-    <div id="loading-cover" style="display:none;">
+    <!-- Cover de carga: visible desde el inicio -->
+    <div id="loading-cover">
       <div id="unity-loading-bar">
         <div id="unity-logo">
-          <img src="logo.png" alt="Logo">
-          <div id="unity-progress-bar-empty" style="display: none;">
+          <img src="logo.png" alt="Logo" />
+          <div id="unity-progress-bar-empty">
             <div id="unity-progress-bar-full"></div>
           </div>
         </div>
@@ -139,58 +176,65 @@
     <script>
       let _HOST = window.origin;
       let unityInst = null;
+
       const hideFullScreenButton = "true";
-      const buildUrl = "Build";
+      const buildUrl  = "Build";
       const loaderUrl = buildUrl + "/FilLightWeb.loader.js";
+
       const config = {
-        dataUrl: buildUrl + "/FilLightWeb.data",
+        dataUrl:      buildUrl + "/FilLightWeb.data",
         frameworkUrl: buildUrl + "/FilLightWeb.framework.js",
-        codeUrl: buildUrl + "/FilLightWeb.wasm",
+        codeUrl:      buildUrl + "/FilLightWeb.wasm",
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "Karnal",
-        productName: "FilmLight",
-        productVersion: "0.1.0",
+        companyName:       "Karnal",
+        productName:       "FilmLight",
+        productVersion:    "0.1.0",
       };
 
-      const container = document.querySelector("#unity-container");
-      const canvas = document.querySelector("#unity-canvas");
-      const loadingCover = document.querySelector("#loading-cover");
-      const progressBarEmpty = document.querySelector("#unity-progress-bar-empty");
-      const progressBarFull = document.querySelector("#unity-progress-bar-full");
-      const fullscreenButton = document.querySelector("#unity-fullscreen-button");
-      const spinner = document.querySelector('.spinner');
+      const container       = document.querySelector("#unity-container");
+      const canvas          = document.querySelector("#unity-canvas");
+      const loadingCover    = document.querySelector("#loading-cover");
+      const progressEmpty   = document.querySelector("#unity-progress-bar-empty");
+      const progressFull    = document.querySelector("#unity-progress-bar-full");
+      const fullscreenBtn   = document.querySelector("#unity-fullscreen-button");
+      const spinner         = document.querySelector(".spinner");
 
+      // Fullscreen disponible?
       let canFullscreen = (function() {
-        for (const key of [
-            'exitFullscreen',
-            'mozCancelFullScreen',
-            'msExitFullscreen',
-          ]) {
+        for (const key of ['exitFullscreen','mozCancelFullScreen','msExitFullscreen']) {
           if (key in document) return true;
         }
         return false;
       }());
 
+      // Ajustes móviles
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         container.className = "unity-mobile";
         config.devicePixelRatio = 1;
       }
 
-      loadingCover.style.display = "";
 
+      // Carga del loader de Unity
       const script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
-          spinner.style.display = "none";
-          progressBarEmpty.style.display = "";
-          progressBarFull.style.width = `${100 * progress}%`;
+          // En el primer tick quitamos el spinner y aseguramos que la barra esté visible
+          if (spinner && spinner.style.display !== "none") spinner.style.display = "none";
+          if (progressEmpty && progressEmpty.style.display === "none") progressEmpty.style.display = "";
+
+          // Actualizamos el ancho de la barra llena en %
+          if (progressFull) progressFull.style.width = (progress * 100) + "%";
         }).then((unityInstance) => {
           unityInst = unityInstance;
-          loadingCover.style.display = "none";
-          if (canFullscreen) {
-            if (!hideFullScreenButton) fullscreenButton.style.display = "";
-            fullscreenButton.onclick = () => unityInstance.SetFullscreen(1);
+
+          // Ocultamos el cover de carga
+          if (loadingCover) loadingCover.style.display = "none";
+
+          // Fullscreen opcional
+          if (canFullscreen && !hideFullScreenButton) {
+            fullscreenBtn.style.display = "";
+            fullscreenBtn.onclick = () => unityInstance.SetFullscreen(1);
           }
         }).catch((message) => {
           alert(message);
