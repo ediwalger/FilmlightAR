@@ -19,7 +19,7 @@
         /* Ancho de la barra relativo al logo */
         --progress-width: 90%;
         /* Distancia del bloque (logo+barra) al borde inferior */
-        --loading-bottom: 8vh;
+
       }
 
       /* Bloque (logo + barra) posicionado respecto al borde inferior */
@@ -39,50 +39,43 @@
         display: inline-block;
         line-height: 0; /* evita espacios fantasma alrededor de la imagen */
       }
-
 #unity-logo img {
   display: block;
   height: auto;
-  /* Logo más grande */
-  width: clamp(520px, 80vw, 1000px); /* antes 40vw → ahora 60vw */
-  max-height: 80vh; /* antes 48vh → ahora 60vh */
+  width: 90vw;        /* logo ocupa casi todo el ancho en cualquier orientación */
   object-fit: contain;
 }
 
 /* Barra SOBRE el logo */
 #unity-progress-bar-empty {
   position: absolute;
-  left: var(--progress-pos-x);
-  top: var(--progress-pos-y);
+  left: 50%;
+  top: 60%;               /* la barra un poco más abajo del centro del logo */
   transform: translate(-50%, -50%);
-  width: 90%;   /* antes 70% → ahora 85% */
+  width: 90%;             /* más ancha (relativa al logo) */
   z-index: 2;
 }
 
 /* Portrait (vertical) */
 @media (orientation: portrait) {
-  :root {
-    --loading-bottom: 6vh;
-    --progress-width: 85%;
-    --progress-pos-y: 58%;
-  }
   #unity-logo img {
-    width: clamp(240px, 80vw, 780px); /* antes 78vw → ahora 80vw */
-    max-height: 55vh; /* antes 42vh → ahora 55vh */
+    width: 90vw;        /* usa casi todo el ancho */
+  }
+  #unity-progress-bar-empty {
+    width: 88%;
+    top: 62%;
   }
 }
 
 /* Landscape (horizontal) */
 @media (orientation: landscape) {
-  :root {
-    --loading-bottom: 10vh;
-    --progress-width: 85%;
-    --progress-pos-y: 55%;
-  }
   #unity-logo img {
-    width: auto;
-    height: min(55vh, 400px); /* antes 42vh → ahora 55vh */
-    max-width: 85vw;          /* antes 70vw → ahora 85vw */
+    width: auto;         /* controla por alto */
+    height: 65vh;        /* ocupa gran parte de la altura */
+  }
+  #unity-progress-bar-empty {
+    width: 85%;
+    top: 60%;
   }
 }
 
@@ -97,19 +90,7 @@
         #unity-logo img {
           width: auto;
           height: min(42vh, 320px);
-          max-width: 70vw;      /* no usar todo el ancho para que se vea elegante */
-        }
-      }
-
-      /* Teléfonos muy pequeños (ancho <= 360px) */
-      @media (max-width: 360px) {
-        #unity-logo img {
-          width: 86vw;
-          max-height: 38vh;
-        }
-        :root {
-          --progress-width: 82%;
-          --progress-pos-y: 58%;
+          
         }
       }
 
