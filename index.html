@@ -10,92 +10,100 @@
 
     <style>
       /* =========================
-         Variables base (puedes ajustarlas)
+         LOGO Y BARRA
          ========================= */
-      :root {
-        /* Posición de la barra DENTRO del logo (en %) */
-        --progress-pos-x: 50%;
-        --progress-pos-y: 55%; /* 50% = centro exacto; 55% = un poco más abajo */
-        /* Ancho de la barra relativo al logo */
-        --progress-width: 90%;
-        /* Distancia del bloque (logo+barra) al borde inferior */
 
-      }
-
-      /* Bloque (logo + barra) posicionado respecto al borde inferior */
+      /* Contenedor del bloque (logo + barra) */
       #unity-loading-bar {
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        bottom: calc(var(--loading-bottom) + env(safe-area-inset-bottom, 0px));
+        bottom: 10vh; /* distancia desde abajo de la pantalla */
         text-align: center;
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-        z-index: 1;
+        z-index: 2;
       }
 
-      /* El logo es el contenedor de referencia para la barra sobrepuesta */
+      /* El logo sirve como referencia */
       #unity-logo {
         position: relative;
         display: inline-block;
-        line-height: 0; /* evita espacios fantasma alrededor de la imagen */
+        line-height: 0;
       }
-#unity-logo img {
-  display: block;
-  height: auto;
-  width: 90vw;        /* logo ocupa casi todo el ancho en cualquier orientación */
-  object-fit: contain;
-}
 
-/* Barra SOBRE el logo */
-#unity-progress-bar-empty {
-  position: absolute;
-  left: 50%;
-  top: 60%;               /* la barra un poco más abajo del centro del logo */
-  transform: translate(-50%, -50%);
-  width: 90%;             /* más ancha (relativa al logo) */
-  z-index: 2;
-}
+      /* Logo grande y centrado */
+      #unity-logo img {
+        display: block;
+        object-fit: contain;
+        width: 90vw;        /* por defecto ocupa casi todo el ancho */
+        max-width: 1200px;  /* límite en desktop grandes */
+        max-height: 75vh;   /* no exceder altura de pantalla */
+        height: auto;
+      }
 
-/* Portrait (vertical) */
-@media (orientation: portrait) {
-  #unity-logo img {
-    width: 90vw;        /* usa casi todo el ancho */
-  }
-  #unity-progress-bar-empty {
-    width: 88%;
-    top: 62%;
-  }
-}
+      /* Barra sobrepuesta dentro del logo */
+      #unity-progress-bar-empty {
+        position: absolute;
+        left: 50%;
+        top: 60%; /* un poco más abajo del centro */
+        transform: translate(-50%, -50%);
+        width: 90%; /* ancha relativa al logo */
+        z-index: 3;
+      }
 
-/* Landscape (horizontal) */
-@media (orientation: landscape) {
-  #unity-logo img {
-    width: auto;         /* controla por alto */
-    height: 65vh;        /* ocupa gran parte de la altura */
-  }
-  #unity-progress-bar-empty {
-    width: 85%;
-    top: 60%;
-  }
-}
+      /* Hacer la barra más visible */
+      #unity-progress-bar-empty,
+      #unity-progress-bar-full {
+        height: 18px;          /* grosor de la barra */
+        border-radius: 10px;
+      }
 
-      /* Horizontal (landscape): el logo usa más alto relativo y ancho automático;
-         la barra un poco más angosta */
-      @media (orientation: landscape) {
-        :root {
-          --loading-bottom: 10vh;
-          --progress-width: 60%;
-          --progress-pos-y: 55%;
+      /* =========================
+         RESPONSIVE
+         ========================= */
+
+      /* Vertical (portrait): logo más ancho */
+      @media (orientation: portrait) {
+        #unity-logo img {
+          width: 95vw;
+          max-height: 72vh;
         }
+        #unity-progress-bar-empty {
+          width: 92%;
+          top: 62%;
+        }
+        #unity-loading-bar {
+          bottom: 8vh;
+        }
+      }
+
+      /* Horizontal (landscape): logo manda por altura */
+      @media (orientation: landscape) {
         #unity-logo img {
           width: auto;
-          height: min(42vh, 320px);
-          
+          height: 70vh;     /* grande por altura */
+          max-width: 92vw;
+        }
+        #unity-progress-bar-empty {
+          width: 85%;
+          top: 58%;
+        }
+        #unity-loading-bar {
+          bottom: 10vh;
         }
       }
 
-      /* Opcional: si quieres que el contenedor del cover ocupe toda la pantalla y
-         te aseguras que nada se esconda detrás de barras del sistema */
+      /* Teléfonos muy pequeños */
+      @media (max-width: 360px) {
+        #unity-logo img {
+          width: 96vw;
+          max-height: 68vh;
+        }
+        #unity-progress-bar-empty {
+          width: 92%;
+        }
+      }
+
+      /* Cover ocupa toda la pantalla */
       #loading-cover {
         position: fixed !important;
         inset: 0;
@@ -105,7 +113,6 @@
                  env(safe-area-inset-left, 0px);
       }
 
-      /* Spinner visible solo mientras no hay progreso */
       .spinner { margin-top: 16px; }
     </style>
   </head>
