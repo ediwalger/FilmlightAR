@@ -17,7 +17,7 @@
         --progress-pos-x: 50%;
         --progress-pos-y: 55%; /* 50% = centro exacto; 55% = un poco más abajo */
         /* Ancho de la barra relativo al logo */
-        --progress-width: 70%;
+        --progress-width: 90%;
         /* Distancia del bloque (logo+barra) al borde inferior */
         --loading-bottom: 8vh;
       }
@@ -40,44 +40,51 @@
         line-height: 0; /* evita espacios fantasma alrededor de la imagen */
       }
 
-      #unity-logo img {
-        display: block;
-        height: auto;
-        /* Tamaño por defecto (desktop/tablet) */
-        width: clamp(220px, 40vw, 520px);
-        max-height: 48vh;       /* evita que crezca demasiado y se corte en pantallas bajas */
-        object-fit: contain;    /* nunca recorta la imagen */
-      }
+#unity-logo img {
+  display: block;
+  height: auto;
+  /* Logo más grande */
+  width: clamp(520px, 80vw, 1000px); /* antes 40vw → ahora 60vw */
+  max-height: 80vh; /* antes 48vh → ahora 60vh */
+  object-fit: contain;
+}
 
-      /* Barra SOBRE el logo, centrada por X/Y */
-      #unity-progress-bar-empty {
-        position: absolute;
-        left: var(--progress-pos-x);
-        top: var(--progress-pos-y);
-        transform: translate(-50%, -50%);
-        width: var(--progress-width);
-        z-index: 2;             /* garantiza que quede sobre el logo */
-        /* Si el logo tuviera interacción, puedes evitar tapar clics:
-           pointer-events: none; */
-      }
+/* Barra SOBRE el logo */
+#unity-progress-bar-empty {
+  position: absolute;
+  left: var(--progress-pos-x);
+  top: var(--progress-pos-y);
+  transform: translate(-50%, -50%);
+  width: 90%;   /* antes 70% → ahora 85% */
+  z-index: 2;
+}
 
-      /* =========================
-         Responsive: Celulares
-         ========================= */
+/* Portrait (vertical) */
+@media (orientation: portrait) {
+  :root {
+    --loading-bottom: 6vh;
+    --progress-width: 85%;
+    --progress-pos-y: 58%;
+  }
+  #unity-logo img {
+    width: clamp(240px, 80vw, 780px); /* antes 78vw → ahora 80vw */
+    max-height: 55vh; /* antes 42vh → ahora 55vh */
+  }
+}
 
-      /* Vertical (portrait): el logo usa más ancho, pero limita alto para no cortarse;
-         barra algo más ancha y bloque un poco más arriba del borde inferior */
-      @media (orientation: portrait) {
-        :root {
-          --loading-bottom: 7vh;
-          --progress-width: 78%;
-          --progress-pos-y: 58%;
-        }
-        #unity-logo img {
-          width: clamp(220px, 78vw, 560px);
-          max-height: 42vh;     /* evita que el alto sobrepase la mitad de la pantalla */
-        }
-      }
+/* Landscape (horizontal) */
+@media (orientation: landscape) {
+  :root {
+    --loading-bottom: 10vh;
+    --progress-width: 85%;
+    --progress-pos-y: 55%;
+  }
+  #unity-logo img {
+    width: auto;
+    height: min(55vh, 400px); /* antes 42vh → ahora 55vh */
+    max-width: 85vw;          /* antes 70vw → ahora 85vw */
+  }
+}
 
       /* Horizontal (landscape): el logo usa más alto relativo y ancho automático;
          la barra un poco más angosta */
