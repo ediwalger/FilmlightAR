@@ -3,60 +3,130 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FilmLight</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
 
     <style>
-      /* ========== Ajustes CLAVE ========== */
+      /* =========================
+         Variables base (puedes ajustarlas)
+         ========================= */
       :root {
-        /* Ajusta la posición de la barra DENTRO del logo (0% = borde sup., 100% = borde inf.) */
+        /* Posición de la barra DENTRO del logo (en %) */
         --progress-pos-x: 50%;
-        --progress-pos-y: 50%; /* 50% = justo al centro vertical del logo */
-        /* Ancho de la barra relativo al ancho del logo */
-        --progress-width: 90%;
+        --progress-pos-y: 55%; /* 50% = centro exacto; 55% = un poco más abajo */
+        /* Ancho de la barra relativo al logo */
+        --progress-width: 70%;
+        /* Distancia del bloque (logo+barra) al borde inferior */
+        --loading-bottom: 8vh;
       }
 
-      /* Bloque (logo + barra sobrepuesta) y su posición general en la pantalla */
+      /* Bloque (logo + barra) posicionado respecto al borde inferior */
       #unity-loading-bar {
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        bottom: 100px; /* Si quieres mover todo el bloque respecto al borde inferior, ajusta aquí */
+        bottom: calc(var(--loading-bottom) + env(safe-area-inset-bottom, 0px));
         text-align: center;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        z-index: 1;
       }
 
-      /* El logo actúa como contenedor de referencia para la barra */
+      /* El logo es el contenedor de referencia para la barra sobrepuesta */
       #unity-logo {
         position: relative;
         display: inline-block;
+        line-height: 0; /* evita espacios fantasma alrededor de la imagen */
       }
 
       #unity-logo img {
         display: block;
-        max-width: 100%;
         height: auto;
+        /* Tamaño por defecto (desktop/tablet) */
+        width: clamp(220px, 40vw, 520px);
+        max-height: 48vh;       /* evita que crezca demasiado y se corte en pantallas bajas */
+        object-fit: contain;    /* nunca recorta la imagen */
       }
 
-      /* Barra SOBRE el logo, centrada (o donde digas con las variables) */
+      /* Barra SOBRE el logo, centrada por X/Y */
       #unity-progress-bar-empty {
         position: absolute;
         left: var(--progress-pos-x);
         top: var(--progress-pos-y);
-        transform: translate(-50%, -50%); /*  Centra exactamente en X/Y */
+        transform: translate(-50%, -50%);
         width: var(--progress-width);
-        z-index: 2; /* Asegura que quede encima de la imagen del logo */
-        /* Opcional: evita tapar clics si el logo llevara interacciones por debajo */
-        /* pointer-events: none; */
+        z-index: 2;             /* garantiza que quede sobre el logo */
+        /* Si el logo tuviera interacción, puedes evitar tapar clics:
+           pointer-events: none; */
       }
-      /* =================================== */
+
+      /* =========================
+         Responsive: Celulares
+         ========================= */
+
+      /* Vertical (portrait): el logo usa más ancho, pero limita alto para no cortarse;
+         barra algo más ancha y bloque un poco más arriba del borde inferior */
+      @media (orientation: portrait) {
+        :root {
+          --loading-bottom: 7vh;
+          --progress-width: 78%;
+          --progress-pos-y: 58%;
+        }
+        #unity-logo img {
+          width: clamp(220px, 78vw, 560px);
+          max-height: 42vh;     /* evita que el alto sobrepase la mitad de la pantalla */
+        }
+      }
+
+      /* Horizontal (landscape): el logo usa más alto relativo y ancho automático;
+         la barra un poco más angosta */
+      @media (orientation: landscape) {
+        :root {
+          --loading-bottom: 10vh;
+          --progress-width: 60%;
+          --progress-pos-y: 55%;
+        }
+        #unity-logo img {
+          width: auto;
+          height: min(42vh, 320px);
+          max-width: 70vw;      /* no usar todo el ancho para que se vea elegante */
+        }
+      }
+
+      /* Teléfonos muy pequeños (ancho <= 360px) */
+      @media (max-width: 360px) {
+        #unity-logo img {
+          width: 86vw;
+          max-height: 38vh;
+        }
+        :root {
+          --progress-width: 82%;
+          --progress-pos-y: 58%;
+        }
+      }
+
+      /* Opcional: si quieres que el contenedor del cover ocupe toda la pantalla y
+         te aseguras que nada se esconda detrás de barras del sistema */
+      #loading-cover {
+        position: fixed !important;
+        inset: 0;
+        padding: env(safe-area-inset-top, 0px)
+                 env(safe-area-inset-right, 0px)
+                 env(safe-area-inset-bottom, 0px)
+                 env(safe-area-inset-left, 0px);
+      }
+
+      /* Spinner visible solo mientras no hay progreso */
+      .spinner { margin-top: 16px; }
     </style>
   </head>
+
   <body class="dark">
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas"></canvas>
     </div>
+
     <div id="loading-cover" style="display:none;">
       <div id="unity-loading-bar">
         <div id="unity-logo">
@@ -68,6 +138,7 @@
         <div class="spinner"></div>
       </div>
     </div>
+
     <div id="unity-fullscreen-button" style="display: none;"></div>
 
     <script>
@@ -100,9 +171,7 @@
             'mozCancelFullScreen',
             'msExitFullscreen',
           ]) {
-          if (key in document) {
-            return true;
-          }
+          if (key in document) return true;
         }
         return false;
       }());
@@ -125,12 +194,8 @@
           unityInst = unityInstance;
           loadingCover.style.display = "none";
           if (canFullscreen) {
-            if (!hideFullScreenButton) {
-              fullscreenButton.style.display = "";
-            }
-            fullscreenButton.onclick = () => {
-              unityInstance.SetFullscreen(1);
-            };
+            if (!hideFullScreenButton) fullscreenButton.style.display = "";
+            fullscreenButton.onclick = () => unityInstance.SetFullscreen(1);
           }
         }).catch((message) => {
           alert(message);
